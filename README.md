@@ -5,8 +5,8 @@ A news reader that combines content from multiple sources and applies document s
 
 ============================================================================================================================
 
-Framework : Django 1.5.1
-Language : Python
+Framework : Django 1.5.1;
+Language : Python;
 Dependencies : Python NLTK, scikit-learn, networkx, BeautifulSoap
 
 
