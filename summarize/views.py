@@ -47,7 +47,105 @@ class story:
 
         self.article.replace("&nbsp;","")
         
+
+def crawlNDTVMain(link):
+    
+    global articles
+    
+    try:
+        linkContent = getPage(link)
+    except:
+        print "Problem getting Page. Connection issues."
+        return
+    
+    linkSoup = BeautifulSoup(linkContent.read())
+    print "crawling" , link
+    div = linkSoup.find("div",id="in_main_story")
+
+    tagsToRemove = []
+    
+    if div:
+        titleString = linkSoup.find("h1").string
+
+        print titleString
+        
+        for tag in div.findAll(True):
+            if tag.parent == div:
+               tagsToRemove.append(tag)
+
+        for rem in tagsToRemove:
+            s = ""
+            if rem.name == "a":
+                s = rem.string
+            rem.replaceWith(s)
+        
+        article = ""
+        
+        for string in div.contents:
+            if string != u'\n' and string != u'':
+                article = article + string
+
+        if article != "":
+            storyObj = story(titleString,summarizeArticle(article),link,"NDTV")
+            articles.append(storyObj)
+
+def crawlNDTVsubDomains(link,domain):
+
+    global articles
+    
+    try:
+        linkContent = getPage(link)
+    except:
+        print "Problem getting Page. Connection issues."
+        return
+
+    linkSoup = BeautifulSoup(linkContent.read())
+    print "crawling ", domain , link
+    divs = linkSoup("div")
+
+    if domain == "profit":
+        className = "pdl200"
+    elif domain == "sports":
+        className = "art-body"
+
+    internalLinks = []
+    
+    for div in divs:
+        if ('class' in dict(div.attrs)):
+            if (div['class'] == className):
+
+                titleString = linkSoup.find("h1").string
+
+                print titleString
+
+                article = ""
                 
+                for tag in div.findAll(True):
+                    if tag and tag.name == "p":
+                        for item in tag.contents:
+                            try:
+                                if ('name' in dict(item.attrs)):
+                                    if item['name'] == "a":
+                                        internalLinks.append(item['href'])
+                                        try:
+                                            article = article + item.string
+                                        except:
+                                            article = article + item.contents[0].string
+
+                                    elif item['name'] == "strong":
+                                        article = article + item.string
+
+                            except:
+                                article = article + str(item.replace('\n','').replace('\r','').replace('\t',''))
+
+                                     
+                                
+                            
+                
+                if article != "":
+                    storyObj = story(titleString,summarizeArticle(article),link,"NDTV")
+                    articles.append(storyObj)
+
 
 def summarizeArticle(raw):
     sentenceTokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
@@ -94,77 +192,46 @@ def crawlNDTV(response):
 
     global articles
     
-    crawlURL = "http://www.ndtv.com"
-    try:
-        content = urllib2.urlopen(crawlURL)
-    except:
-        return HttpResponse("Connection Error")
-    
-    soup = BeautifulSoup(content.read())
-
-    divs = soup.findAll('div')
-
-    linksList = []
-
-    for div in divs:
-        if ('class' in dict(div.attrs)):
-            if (div['class'] == "topst_listing"):
-                links = div.findAll('a')
-
-                for link in links:
-                    linksList.append(link['href'].split('?')[0])
-
-                break
-
-    time.sleep(1)
+##    crawlURL = "http://www.ndtv.com"
+##    try:
+##        content = urllib2.urlopen(crawlURL)
+##    except:
+##        return HttpResponse("Connection Error")
+##    
+##    soup = BeautifulSoup(content.read())
+##
+##    divs = soup.findAll('div')
+##
+##    linksList = []
+##
+##    for div in divs:
+##        if ('class' in dict(div.attrs)):
+##            if (div['class'] == "topst_listing"):
+##                links = div.findAll('a')
+##
+##                for link in links:
+##                    linksList.append(link['href'].split('?')[0])
+##
+##                break
+##
+##    time.sleep(1)
+##
+    linksList = ['http://sports.ndtv.com/indian-premier-league-2014/news/224843-after-win-vs-kings-xi-punjab-kolkata-knight-riders-skipper-gautam-gambhir-thanks-shah-rukh-khan-for-support-during-low-times']
     
    
     for link in linksList:
         
         if link.split(".")[0] == "http://www" and "opinion" not in link:
+            crawlNDTVMain(link)
+                
+        elif link.split(".")[0] == "http://profit" and "opinion" not in link:
+            crawlNDTVsubDomains(link,"profit")
 
-            try:
-                print link, "<----"
-                linkContent = getPage(link)
-            except:
-                print "Problem getting Page. Connection issues."
-                continue
-    
-            linkSoup = BeautifulSoup(linkContent.read())
-            print "crawling" , link
-            div = linkSoup.find("div",id="in_main_story")
-
-            tagsToRemove = []
+        elif link.split(".")[0] == "http://sports" and "opinion" not in link:
+            crawlNDTVsubDomains(link,"sports")
             
-            if div:
-                titleString = linkSoup.find("h1").string
-
-                print titleString
-                            
-                
-                
-                for tag in div.findAll(True):
-                    if tag.parent == div:
-                       tagsToRemove.append(tag)
-
-                for rem in tagsToRemove:
-                    s = ""
-                    if rem.name == "a":
-                        s = rem.string
-                    rem.replaceWith(s)
-                
-                article = ""
-                
-                for string in div.contents:
-                    if string != u'\n' and string != u'':
-                        article = article + string
-
-                if article != "":
-                    storyObj = story(titleString,summarizeArticle(article),link,"NDTV")
-                    articles.append(storyObj)
-
-                
-
+            
+            
                         
     return HttpResponse(articles)
 
