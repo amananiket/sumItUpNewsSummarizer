@@ -1,0 +1,55 @@
+[33mcommit fb75f4be4da20342e7e8394b28cabfff51c37fa7[m
+Author: aman.aniket <aman.aniket93@gmail.com>
+Date:   Fri May 30 01:55:18 2014 +0530
+
+    added crawler for NDTV profit and sports.
+
+[33mcommit bb8c5c29b5a3bb901b466a396bf41f764c197649[m
+Merge: 14c2f76 6710f6a
+Author: aman.aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 22:20:43 2014 +0530
+
+    Merge branch 'master' of https://github.com/amananiket/sumItUpNewsSummarizer
+
+[33mcommit 14c2f76c7f4b7309502045293b2bdca94f23599d[m
+Author: aman.aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 22:19:19 2014 +0530
+
+    updated settings.py and added .gitignore
+
+[33mcommit 6710f6ae54096fae854d4498fa29a19bd4bf0533[m
+Author: Aman Aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 21:18:13 2014 +0530
+
+    Update README.md
+
+[33mcommit 18c67d41cef8ada7062c179ab92ee99072a9ef9b[m
+Author: Aman Aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 20:49:20 2014 +0530
+
+    Update README.md
+
+[33mcommit 7529ed5e6f3f91912bcdd4937cf3752caa4bcefb[m
+Author: Aman Aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 20:47:44 2014 +0530
+
+    Updated README
+
+[33mcommit 7a33ea101b05dba5020db038ddedef3b1c0395c0[m
+Merge: a508ec1 5bf6649
+Author: aman.aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 20:35:11 2014 +0530
+
+    Merge branch 'master' of https://github.com/amananiket/sumItUpNewsSummarizer
+
+[33mcommit a508ec1ba05ae0e3df78a9cab93852b579eb9263[m
+Author: aman.aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 19:56:53 2014 +0530
+
+    first commit
+
+[33mcommit 5bf664978aff28f0934beab02d314eb710ba2f6c[m
+Author: Aman Aniket <aman.aniket93@gmail.com>
+Date:   Wed May 28 19:53:53 2014 +0530
+
+    Initial commit

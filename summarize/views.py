@@ -111,7 +111,7 @@ def crawlNDTVsubDomains(link,domain):
     internalLinks = []
     
     for div in divs:
-        if ('class' in dict(div.attrs)):
+        if ('class' in dict(div.attrs)) and domain != "gadgets":
             if (div['class'] == className):
 
                 titleString = linkSoup.find("h1").string
@@ -130,7 +130,8 @@ def crawlNDTVsubDomains(link,domain):
                                         try:
                                             article = article + item.string
                                         except:
-                                            article = article + item.contents[0].string
+                                            if len(item.contents)==1:
+                                               article = article + item.contents[0].string
 
                                     elif item['name'] == "strong":
                                         article = article + item.string
@@ -145,6 +146,44 @@ def crawlNDTVsubDomains(link,domain):
                 if article != "":
                     storyObj = story(titleString,summarizeArticle(article),link,"NDTV")
                     articles.append(storyObj)
+
+
+        elif ('id' in dict(div.attrs)):
+            if (div['id'] == "HeadContent_FullstoryCtrl_fulldetails"):
+
+                titleString = linkSoup.find("span",id="HeadContent_FullstoryCtrl_title").string
+
+                print titleString
+
+                article = ""
+                
+                for tag in div.findAll(True):
+                    if tag and tag.name == "p":
+                        for item in tag.contents:
+                            try:
+                                if ('name' in dict(item.attrs)):
+                                    if item['name'] == "a":
+                                        internalLinks.append(item['href'])
+                                        try:
+                                            article = article + item.string
+                                        except:
+                                            if len(item.contents)==1:
+                                               article = article + item.contents[0].string
+
+                                    elif item['name'] == "strong":
+                                        article = article + item.string
+
+                            except:
+                                article = article + str(item.replace('\n','').replace('\r','').replace('\t',''))
+
+                                     
+                                
+                            
+                
+                if article != "":
+                    storyObj = story(titleString,summarizeArticle(article),link,"NDTV")
+                    articles.append(storyObj)
+ 
 
 
 def summarizeArticle(raw):
@@ -216,7 +255,7 @@ def crawlNDTV(response):
 ##
 ##    time.sleep(1)
 ##
-    linksList = ['http://sports.ndtv.com/indian-premier-league-2014/news/224843-after-win-vs-kings-xi-punjab-kolkata-knight-riders-skipper-gautam-gambhir-thanks-shah-rukh-khan-for-support-during-low-times']
+    linksList = ['http://gadgets.ndtv.com/mobiles/news/wickedleak-wammy-neo-with-17ghz-octa-core-soc-launched-at-rs-11990-532735']
     
    
     for link in linksList:
@@ -229,7 +268,10 @@ def crawlNDTV(response):
 
         elif link.split(".")[0] == "http://sports" and "opinion" not in link:
             crawlNDTVsubDomains(link,"sports")
-            
+
+        elif link.split(".")[0] == "http://gadgets" and "opinion" not in link:
+            crawlNDTVsubDomains(link,"gadgets")
+
             
             
                         
