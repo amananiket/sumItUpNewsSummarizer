@@ -47,6 +47,58 @@ class story:
 
         self.article.replace("&nbsp;","")
         
+        
+def crawlHinduArticle(link):
+    
+    global articles
+    
+    try:
+        linkContent = getPage(link)
+    except:
+        print "Problem getting page. Connection issues"
+        return
+    
+    linkSoup = BeautifulSoup(linkContent.read())
+    print "crawling" , link
+    
+    try:
+        titleString = linkSoup.find('h1').string
+    except:
+        titleString = ""
+    
+    articleBlock = linkSoup.find('div',id="article-block")
+    
+    for divs in articleBlock:
+        try:
+            if divs['class'] == "article-text":
+                articleWrapper = divs
+                print "div found"
+                break
+        except:
+            continue
+        
+    article = ""
+        
+    for item in articleWrapper:
+        try:
+            if item.name == "p":
+                print item
+                if ('&#8220;' in item.string):
+                    print "yes!"
+                    
+                article = article +  str(item.string.replace('&#8220;','"').replace('&#8221;','"').replace('\n','').replace('\r','').replace('\t',''))
+               
+        except:
+            continue
+        
+    if article != "":
+        storyObj = story(titleString,summarizeArticle(article),link,"The Hindu")
+        articles.append(storyObj)
+        
+    return
+        
+     
+
 
 def crawlNDTVMain(link):
     
@@ -187,8 +239,9 @@ def crawlNDTVsubDomains(link,domain):
 
 
 def summarizeArticle(raw):
-    sentenceTokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
-    sentTokens = sentenceTokenizer.tokenize(raw)
+    #sentenceTokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    #sentTokens = sentenceTokenizer.tokenize(raw)
+    sentTokens = raw.split('.')
 
     featureMatrix = fe.CountVectorizer().fit_transform(sentTokens)
     normalizedMatrix = fe.TfidfTransformer().fit_transform(featureMatrix)
@@ -231,51 +284,79 @@ def crawlNDTV(response):
 
     global articles
     
-##    crawlURL = "http://www.ndtv.com"
-##    try:
-##        content = urllib2.urlopen(crawlURL)
-##    except:
-##        return HttpResponse("Connection Error")
-##    
-##    soup = BeautifulSoup(content.read())
-##
-##    divs = soup.findAll('div')
-##
-##    linksList = []
-##
-##    for div in divs:
-##        if ('class' in dict(div.attrs)):
-##            if (div['class'] == "topst_listing"):
-##                links = div.findAll('a')
-##
-##                for link in links:
-##                    linksList.append(link['href'].split('?')[0])
-##
-##                break
-##
-##    time.sleep(1)
-##
-    linksList = ['http://gadgets.ndtv.com/mobiles/news/wickedleak-wammy-neo-with-17ghz-octa-core-soc-launched-at-rs-11990-532735']
+    crawlURL = "http://www.thehindu.com"
+
+    try:
+        content = urllib2.urlopen(crawlURL)
+    except:
+        return HttpResponse("Connection Error")
     
-   
+    soup = BeautifulSoup(content.read())
+    
+    linksList = []
+    
+#### Getting top stories' links from The hindu's website
+     
+    mainLink = soup.find('h1').find('a')['href'].split("?")[0]
+      
+    linksList.append(mainLink)
+      
+    headingsDiv = soup.find('div',id="most-tab")
+      
+    for item in headingsDiv.contents:
+        try:
+            if ('class' in dict(item.attrs)):
+                if (item['class'] == "tab1 tab"):
+                    headings = item.findAll('h3')
+        except:
+            continue        
+      
+    for heading in headings:
+          
+        link = heading.find('a')['href'].split("?")[0]
+        linksList.append(link)        
+      
+
+### getting top stories' links from NDTV's home page
+#     divs = soup.findAll('div')
+# 
+#     linksList = []
+# 
+#     for div in divs:
+#         if ('class' in dict(div.attrs)):
+#             if (div['class'] == "topst_listing"):
+#                 links = div.findAll('a')
+# 
+#                 for link in links:
+#                     linksList.append(link['href'].split('?')[0])
+# 
+#                 break
+
+    time.sleep(1)
+##
     for link in linksList:
         
-        if link.split(".")[0] == "http://www" and "opinion" not in link:
-            crawlNDTVMain(link)
-                
-        elif link.split(".")[0] == "http://profit" and "opinion" not in link:
-            crawlNDTVsubDomains(link,"profit")
-
-        elif link.split(".")[0] == "http://sports" and "opinion" not in link:
-            crawlNDTVsubDomains(link,"sports")
-
-        elif link.split(".")[0] == "http://gadgets" and "opinion" not in link:
-            crawlNDTVsubDomains(link,"gadgets")
-
-            
+        crawlHinduArticle(link)
+#   NDTV  
+#    
+#     for link in linksList:
+#         
+#         if link.split(".")[0] == "http://www" and "opinion" not in link:
+#             crawlNDTVMain(link)
+#                 
+#         elif link.split(".")[0] == "http://profit" and "opinion" not in link:
+#             crawlNDTVsubDomains(link,"profit")
+# 
+#         elif link.split(".")[0] == "http://sports" and "opinion" not in link:
+#             crawlNDTVsubDomains(link,"sports")
+# 
+#         elif link.split(".")[0] == "http://gadgets" and "opinion" not in link:
+#             crawlNDTVsubDomains(link,"gadgets")
+# 
+#             
             
                         
-    return HttpResponse(articles)
+    return HttpResponse(linksList)
 
 
 def home(response):
